@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+#shellcheck source=../.qfuncs.sh
+# source ~/.qfuncs.sh
+
+set -e
+
+if [ $# -eq 0 ] || [[ $1 =~ ^--?h(elp)?$ ]]; then
+   cat - <<EOM
+Extract cookies from Firefox to a file or STDOUT.
+
+USAGE:
+   $(basename "$0") [TARGET]
+WHERE:
+   TARGET:  The target file to extract cookies to.
+DEFAULT:
+   If TARGET is '-' or is not provided, it will default to STDOUT.
+EOM
+   exit 1
+fi
+
+if [ "$#" -eq 0 ] || [ "$1" = "-" ]; then
+   target="/dev/stdout"
+else
+   target="$1"
+fi
+
+sqlite3 ~/.mozilla/firefox/*.default-release/cookies.sqlite "SELECT host, path, isSecure, expiry, name, value FROM moz_cookies" > "$target"
